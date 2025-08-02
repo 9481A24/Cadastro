@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elas Azulejista - Notas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; max-width: 700px; margin: auto; padding: 20px; background:#f5f5f5;}
+    input, button { padding: 8px; font-size: 16px; margin-right: 8px;}
+    table { width: 100%; border-collapse: collapse; margin-top: 20px;}
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left;}
+    th { background: #ddd;}
+  </style>
+</head>
+<body>
+  <h1>Elas Azulejista - Notas Salvas</h1>
+
+  <input type="text" id="buscaCliente" placeholder="Buscar por nome do cliente" />
+  <button onclick="buscarNotas()">Buscar</button>
+  <button onclick="carregarTodas()">Mostrar todas</button>
+
+  <table id="tabelaNotas">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>CPF Cliente</th>
+        <th>Descrição</th>
+        <th>Valor (R$)</th>
+        <th>Pagamento</th>
+        <th>Prestador</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <hr/>
+  <a href="index.html">Cadastrar nota</a> | <a href="divisao.html">Divisão de dinheiro</a>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI",
+      authDomain: "COLE_AQUI.firebaseapp.com",
+      projectId: "COLE_AQUI",
+      storageBucket: "COLE_AQUI.appspot.com",
+      messagingSenderId: "COLE_AQUI",
+      appId: "COLE_AQUI"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tabelaBody = document.querySelector('#tabelaNotas tbody');
+
+    function renderNotas(docs) {
+      tabelaBody.innerHTML = '';
+      if (docs.length === 0) {
+        tabelaBody.innerHTML = '<tr><td colspan="7">Nenhuma nota encontrada.</td></tr>';
+        return;
+      }
+      docs.forEach(doc => {
+        const data = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${data.cliente}</td>
+          <td>${data.cpfCliente}</td>
+          <td>${data.descricao}</td>
+          <td>${data.valor.toFixed(2)}</td>
+          <td>${data.formaPagamento}</td>
+          <td>${data.prestador}</td>
+          <td>${new Date(data.data).toLocaleDateString()}</td>
+        `;
+        tabelaBody.appendChild(tr);
+      });
+    }
+
+    function carregarTodas() {
+      db.collection('notas').orderBy('data', 'desc').limit(50).get()
+        .then(snapshot => renderNotas(snapshot.docs))
+        .catch(err => alert('Erro: ' + err));
+    }
+
+    function buscarNotas() {
+      const busca = document.getElementById('buscaCliente').value.trim().toLowerCase();
+      if (!busca) {
+        carregarTodas();
+        return;
+      }
+      db.collection('notas').orderBy('cliente')
+        .startAt(busca)
+        .endAt(busca + '\uf8ff')
+        .limit(50)
+        .get()
+        .then(snapshot => renderNotas(snapshot.docs))
+        .catch(err => alert('Erro: ' + err));
+    }
+
+    carregarTodas();
+  </script>
+</body>
+</html>
