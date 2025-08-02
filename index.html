@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Nota Fiscal + Divisão de Valor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+    }
+    #notaFiscal, #divisaoValor {
+      background: #fff;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Nota Fiscal de Serviço + Divisão do Dinheiro</h2>
+
+  <!-- Dados do Prestador -->
+  <label>Nome do Prestador:</label>
+  <input type="text" id="nomePrestador">
+
+  <label>CPF/CNPJ do Prestador:</label>
+  <input type="text" id="cpfPrestador">
+
+  <!-- Dados do Cliente -->
+  <label>Nome do Cliente:</label>
+  <input type="text" id="nomeCliente">
+
+  <label>CPF/CNPJ do Cliente:</label>
+  <input type="text" id="cpfCliente">
+
+  <!-- Serviço -->
+  <label>Serviço Prestado:</label>
+  <input type="text" id="servico">
+
+  <label>Valor do Serviço (R$):</label>
+  <input type="number" id="valor">
+
+  <label>Data:</label>
+  <input type="date" id="data">
+
+  <button onclick="gerarNota()">Gerar Nota e Dividir Valor</button>
+
+  <div id="notaFiscal"></div>
+  <div id="divisaoValor"></div>
+
+  <script>
+    function gerarNota() {
+      const nomePrestador = document.getElementById("nomePrestador").value;
+      const cpfPrestador = document.getElementById("cpfPrestador").value;
+      const nomeCliente = document.getElementById("nomeCliente").value;
+      const cpfCliente = document.getElementById("cpfCliente").value;
+      const servico = document.getElementById("servico").value;
+      const valor = parseFloat(document.getElementById("valor").value);
+      const data = document.getElementById("data").value;
+
+      const nota = `
+--------------------------------------------
+           NOTA FISCAL DE SERVIÇO
+--------------------------------------------
+
+🔹 Prestador:
+Nome: ${nomePrestador}
+CPF/CNPJ: ${cpfPrestador}
+
+🔹 Cliente:
+Nome: ${nomeCliente}
+CPF/CNPJ: ${cpfCliente}
+
+🔹 Serviço:
+${servico}
+Valor: R$ ${valor.toFixed(2)}
+Data: ${data}
+
+Assinatura do Prestador: _____________________
+
+--------------------------------------------
+* Documento gerado manualmente
+`;
+
+      // Divisão de valor
+      const impostos = valor * 0.05;
+      const funcionario = valor * 0.30;
+      const prolabore = valor * 0.35;
+      const investimento = valor * 0.30;
+
+      const divisao = `
+📊 Divisão do Valor Recebido
+
+🔸 Impostos (5%): R$ ${impostos.toFixed(2)}
+🔸 Funcionário (30%): R$ ${funcionario.toFixed(2)}
+🔸 Pró-labore (35%): R$ ${prolabore.toFixed(2)}
+🔸 Investimento (30%): R$ ${investimento.toFixed(2)}
+--------------------------------------------
+💰 Total: R$ ${valor.toFixed(2)}
+`;
+
+      document.getElementById("notaFiscal").textContent = nota;
+      document.getElementById("divisaoValor").textContent = divisao;
+    }
+  </script>
+</body>
+</html>
