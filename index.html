@@ -1,139 +1,211 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Elas Azulejista - Nota de Serviço</title>
+  <meta charset="UTF-8" />
+  <title>Elas Azulejista - Nota Inteligente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* Seu CSS aqui */
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #fff;
-      color: #333;
       padding: 20px;
-      max-width: 700px;
+      max-width: 600px;
       margin: auto;
+      background: #f5f5f5;
     }
-    header {
-      background-color: #000;
-      color: #FFD700;
-      padding: 15px;
-      text-align: center;
-      border-radius: 10px;
-    }
-    .destaque {
-      margin-top: 10px;
-      font-size: 1.1em;
-      font-weight: bold;
-      color: #222;
-      text-align: center;
-    }
-    form {
-      margin-top: 20px;
-    }
-    label {
+    label, input, textarea {
       display: block;
-      margin: 10px 0 5px;
-    }
-    input, select {
       width: 100%;
-      padding: 8px;
       margin-bottom: 10px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .autocomplete-items {
+      border: 1px solid #d4d4d4;
+      border-bottom: none;
+      border-top: none;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      background: white;
+      z-index: 99;
+      width: 100%;
+    }
+    .autocomplete-items div {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #d4d4d4;
+    }
+    .autocomplete-items div:hover {
+      background-color: #e9e9e9;
     }
     button {
-      background-color: #FFD700;
-      color: #000;
-      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      padding: 10px;
       border: none;
+      font-size: 16px;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
-      border-radius: 5px;
+      margin-top: 10px;
     }
-    .nota {
-      margin-top: 30px;
-      padding: 15px;
-      border: 2px dashed #000;
+    button:hover {
+      background: #0056b3;
+    }
+    .relative {
+      position: relative;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Elas Azulejista</h1>
-  </header>
+  <h1>Elas Azulejista - Nota Inteligente</h1>
 
-  <div class="destaque">
-    Transformamos seu ambiente com acabamento de alto padrão.
+  <div class="relative">
+    <label for="nomeCliente">Nome do Cliente</label>
+    <input id="nomeCliente" type="text" placeholder="Digite nome do cliente" autocomplete="off" />
+    <div id="autocomplete-list" class="autocomplete-items"></div>
   </div>
 
-  <form id="formNota">
-    <h3>Dados do Cliente</h3>
-    <label>Nome:</label>
-    <input type="text" id="nomeCliente" required>
+  <label for="cpfCliente">CPF do Cliente</label>
+  <input id="cpfCliente" type="text" placeholder="CPF do cliente" />
 
-    <label>CPF:</label>
-    <input type="text" id="cpfCliente" required>
+  <label for="descricaoServico">Descrição do Serviço</label>
+  <textarea id="descricaoServico" rows="3" placeholder="Descreva o serviço"></textarea>
 
-    <label>Serviço Realizado:</label>
-    <input type="text" id="servico" required>
+  <label for="valorServico">Valor (R$)</label>
+  <input id="valorServico" type="number" min="0" step="0.01" placeholder="Valor do serviço" />
 
-    <label>Valor do Serviço (R$):</label>
-    <input type="number" id="valor" required>
+  <label for="formaPagamento">Forma de Pagamento</label>
+  <select id="formaPagamento">
+    <option>Dinheiro</option>
+    <option>Pix</option>
+    <option>Cartão Débito</option>
+    <option>Cartão Crédito</option>
+  </select>
 
-    <h3>Dados do Prestador</h3>
-    <label>Nome do Prestador:</label>
-    <input type="text" id="nomePrestador" value="Elas Azulejista" required>
+  <label for="nomePrestador">Nome do Prestador</label>
+  <input id="nomePrestador" type="text" placeholder="Nome do prestador" value="Elas Azulejista" />
 
-    <label>CPF do Prestador:</label>
-    <input type="text" id="cpfPrestador" required>
+  <label for="cpfPrestador">CPF do Prestador</label>
+  <input id="cpfPrestador" type="text" placeholder="CPF do prestador" />
 
-    <h3>Forma de Pagamento:</h3>
-    <select id="formaPagamento">
-      <option>Dinheiro</option>
-      <option>Pix</option>
-      <option>Cartão de Crédito</option>
-      <option>Cartão de Débito</option>
-    </select>
+  <button onclick="salvarNota()">Salvar Nota</button>
 
-    <button type="submit">Gerar Nota</button>
-  </form>
-
-  <div class="nota" id="notaGerada" style="display:none">
-    <h2>Nota Fiscal de Serviço</h2>
-    <div id="conteudoNota"></div>
-  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    document.getElementById('formNota').addEventListener('submit', function(e) {
-      e.preventDefault();
+    // COLE AQUI SUA CONFIGURAÇÃO FIREBASE:
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI",
+      authDomain: "COLE_AQUI.firebaseapp.com",
+      projectId: "COLE_AQUI",
+      storageBucket: "COLE_AQUI.appspot.com",
+      messagingSenderId: "COLE_AQUI",
+      appId: "COLE_AQUI"
+    };
 
-      const nomeCliente = document.getElementById('nomeCliente').value;
-      const cpfCliente = document.getElementById('cpfCliente').value;
-      const servico = document.getElementById('servico').value;
-      const valor = parseFloat(document.getElementById('valor').value);
-      const nomePrestador = document.getElementById('nomePrestador').value;
-      const cpfPrestador = document.getElementById('cpfPrestador').value;
-      const formaPagamento = document.getElementById('formaPagamento').value;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-      // Divisão do valor (exemplo):
-      const imposto = valor * 0.05;
-      const funcionario = valor * 0.30;
-      const prolabore = valor * 0.35;
-      const investimento = valor * 0.30;
+    function salvarNota() {
+      const nomeCliente = document.getElementById('nomeCliente').value.trim();
+      const cpfCliente = document.getElementById('cpfCliente').value.trim();
+      const descricao = document.getElementById('descricaoServico').value.trim();
+      const valor = parseFloat(document.getElementById('valorServico').value);
+      const forma = document.getElementById('formaPagamento').value;
+      const nomePrestador = document.getElementById('nomePrestador').value.trim();
+      const cpfPrestador = document.getElementById('cpfPrestador').value.trim();
 
-      const notaHTML = `
-        <p><strong>Cliente:</strong> ${nomeCliente} - CPF: ${cpfCliente}</p>
-        <p><strong>Serviço:</strong> ${servico}</p>
-        <p><strong>Valor Total:</strong> R$ ${valor.toFixed(2)}</p>
-        <p><strong>Forma de Pagamento:</strong> ${formaPagamento}</p>
-        <hr>
-        <p><strong>Prestador:</strong> ${nomePrestador} - CPF: ${cpfPrestador}</p>
-        <p><strong>Imposto (5%):</strong> R$ ${imposto.toFixed(2)}</p>
-        <p><strong>Funcionário (30%):</strong> R$ ${funcionario.toFixed(2)}</p>
-        <p><strong>Pró-labore (35%):</strong> R$ ${prolabore.toFixed(2)}</p>
-        <p><strong>Investimento (30%):</strong> R$ ${investimento.toFixed(2)}</p>
-        <p><em>Emitido em: ${new Date().toLocaleString()}</em></p>
-      `;
+      if (!nomeCliente || !cpfCliente || !descricao || !valor || !nomePrestador || !cpfPrestador) {
+        alert('Preencha todos os campos corretamente!');
+        return;
+      }
 
-      document.getElementById('conteudoNota').innerHTML = notaHTML;
-      document.getElementById('notaGerada').style.display = 'block';
+      db.collection('notas').add({
+        cliente: nomeCliente,
+        cpfCliente: cpfCliente,
+        descricao: descricao,
+        valor: valor,
+        formaPagamento: forma,
+        prestador: nomePrestador,
+        cpfPrestador: cpfPrestador,
+        data: new Date().toISOString()
+      })
+      .then(() => {
+        alert('Nota salva com sucesso!');
+        limparCampos();
+      })
+      .catch(err => {
+        alert('Erro ao salvar nota: ' + err);
+      });
+    }
+
+    function limparCampos() {
+      document.getElementById('nomeCliente').value = '';
+      document.getElementById('cpfCliente').value = '';
+      document.getElementById('descricaoServico').value = '';
+      document.getElementById('valorServico').value = '';
+      document.getElementById('formaPagamento').selectedIndex = 0;
+    }
+
+    const inputNome = document.getElementById('nomeCliente');
+    const autocompleteList = document.getElementById('autocomplete-list');
+
+    inputNome.addEventListener('input', () => {
+      const val = inputNome.value.trim().toLowerCase();
+      autocompleteList.innerHTML = '';
+      if (!val) return;
+
+      db.collection('notas')
+        .orderBy('cliente')
+        .startAt(val)
+        .endAt(val + '\uf8ff')
+        .limit(5)
+        .get()
+        .then(snapshot => {
+          const nomesEncontrados = new Set();
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const nome = data.cliente;
+            if (nome.toLowerCase().startsWith(val) && !nomesEncontrados.has(nome)) {
+              nomesEncontrados.add(nome);
+              const div = document.createElement('div');
+              div.textContent = nome;
+              div.addEventListener('click', () => {
+                preencherDadosCliente(nome);
+                autocompleteList.innerHTML = '';
+              });
+              autocompleteList.appendChild(div);
+            }
+          });
+        })
+        .catch(console.error);
+    });
+
+    function preencherDadosCliente(nome) {
+      db.collection('notas')
+        .where('cliente', '==', nome)
+        .orderBy('data', 'desc')
+        .limit(1)
+        .get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            const data = snapshot.docs[0].data();
+            document.getElementById('nomeCliente').value = data.cliente;
+            document.getElementById('cpfCliente').value = data.cpfCliente || '';
+            document.getElementById('descricaoServico').value = data.descricao || '';
+            document.getElementById('valorServico').value = data.valor || '';
+            document.getElementById('formaPagamento').value = data.formaPagamento || 'Dinheiro';
+          }
+        })
+        .catch(console.error);
+    }
+
+    document.addEventListener('click', function (e) {
+      if (e.target !== inputNome) {
+        autocompleteList.innerHTML = '';
+      }
     });
   </script>
 </body>
