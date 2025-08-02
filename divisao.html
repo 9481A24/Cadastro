@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elas Azulejista - Divisão de Dinheiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: auto; padding: 20px; background:#f5f5f5;}
+    label, input, button { width: 100%; margin-bottom: 12px; padding: 8px; font-size: 16px;}
+    button { background: #007bff; color: white; padding: 10px; border: none; cursor: pointer; font-size: 16px; border-radius: 5px;}
+    button:hover { background: #0056b3;}
+    .result { background: white; padding: 15px; border-radius: 5px; font-size: 18px; margin-top: 20px;}
+  </style>
+</head>
+<body>
+  <h1>Elas Azulejista - Divisão de Dinheiro</h1>
+
+  <label for="valorTotal">Valor total (R$)</label>
+  <input id="valorTotal" type="number" min="0" step="0.01" placeholder="Digite o valor total" />
+
+  <label for="percentImposto">Imposto (%)</label>
+  <input id="percentImposto" type="number" min="0" max="100" step="0.1" value="5" />
+
+  <label for="percentFuncionario">Funcionário (%)</label>
+  <input id="percentFuncionario" type="number" min="0" max="100" step="0.1" value="30" />
+
+  <label for="percentProlabore">Prolabore (%)</label>
+  <input id="percentProlabore" type="number" min="0" max="100" step="0.1" value="35" />
+
+  <label for="percentInvestimento">Investimento (%)</label>
+  <input id="percentInvestimento" type="number" min="0" max="100" step="0.1" value="30" />
+
+  <button onclick="calcularDivisao()">Calcular Divisão</button>
+
+  <div id="resultado" class="result"></div>
+
+  <hr/>
+  <a href="index.html">Cadastrar nota</a> | <a href="notas.html">Ver notas</a>
+
+  <script>
+    function calcularDivisao() {
+      const valor = parseFloat(document.getElementById('valorTotal').value);
+      const imp = parseFloat(document.getElementById('percentImposto').value);
+      const func = parseFloat(document.getElementById('percentFuncionario').value);
+      const pro = parseFloat(document.getElementById('percentProlabore').value);
+      const inv = parseFloat(document.getElementById('percentInvestimento').value);
+
+      if (isNaN(valor) || valor <= 0) {
+        alert('Digite um valor válido!');
+        return;
+      }
+
+      const soma = imp + func + pro + inv;
+      if (soma !== 100) {
+        alert('A soma das porcentagens deve ser 100%.');
+        return;
+      }
+
+      const valImp = (valor * imp) / 100;
+      const valFunc = (valor * func) / 100;
+      const valPro = (valor * pro) / 100;
+      const valInv = (valor * inv) / 100;
+
+      document.getElementById('resultado').innerHTML = `
+        <p><strong>Imposto:</strong> R$ ${valImp.toFixed(2)}</p>
+        <p><strong>Funcionário:</strong> R$ ${valFunc.toFixed(2)}</p>
+        <p><strong>Prolabore:</strong> R$ ${valPro.toFixed(2)}</p>
+        <p><strong>Investimento:</strong> R$ ${valInv.toFixed(2)}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
